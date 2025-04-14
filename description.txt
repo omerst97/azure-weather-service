@@ -1,0 +1,107 @@
+# Weather Data Service Project - File Descriptions
+
+## Core Python Files
+
+### app.py
+The main Flask web application that provides RESTful API endpoints for accessing weather data. It includes routes for:
+- Listing all cities
+- Getting details for a specific city
+- Retrieving weather data for a city
+- Retrieving weather statistics
+- Finding the hottest, coldest, and windiest cities
+This file handles all HTTP requests and interacts with the Azure SQL Database using pymssql.
+
+### collect_weather_data.py
+Responsible for collecting weather data from the Open-Meteo API (a free weather API that doesn't require an API key). This script:
+- Retrieves historical weather data for the past 30 days for multiple cities
+- Stores the data in the Azure SQL Database
+- Calculates and stores weather statistics
+- Includes fallback mechanisms to generate sample data if the API fails
+This script can be run manually or scheduled to run periodically.
+
+### create_tables.py
+Creates the necessary database schema in the Azure SQL Database. It sets up three tables:
+- cities: Stores information about cities (name, country, coordinates)
+- weather_data: Stores daily weather data (temperature, humidity, wind, etc.)
+- weather_stats: Stores aggregated weather statistics
+This script is typically run once during initial setup.
+
+### query_weather_data.py
+A utility script for querying and analyzing weather data from the Azure SQL Database. It demonstrates how to:
+- Connect to the database
+- Execute SQL queries
+- Process and display the results
+This can be used for ad-hoc analysis or testing.
+
+## Docker and Kubernetes Files
+
+### Dockerfile
+Defines how to build the Docker image for the weather data service. It:
+- Uses Python 3.10 as the base image
+- Installs required dependencies
+- Copies application code
+- Sets up the environment
+- Configures the container to run the Flask application with Gunicorn
+
+### kubernetes/deployment.yaml
+Kubernetes deployment configuration that specifies:
+- The container image to use
+- Number of replicas
+- Environment variables
+- Resource requirements
+This file is used to deploy the application to Kubernetes.
+
+### kubernetes/service.yaml
+Kubernetes service configuration that exposes the application to external traffic. It:
+- Defines a LoadBalancer service type
+- Maps port 80 to the container's port 5000
+- Selects pods based on the app label
+
+### kubernetes/secret.yaml
+Kubernetes secret configuration that securely stores sensitive information:
+- Database server address
+- Database name
+- Database username
+- Database password
+These secrets are mounted as environment variables in the application containers.
+
+### kubernetes/cronjob.yaml
+Kubernetes CronJob configuration that schedules regular data collection. It:
+- Runs the collect_weather_data.py script daily at midnight
+- Uses the same container image as the main application
+- Accesses the same database credentials
+
+## Deployment and Automation Scripts
+
+### setup_azure.ps1
+PowerShell script to automate the setup of Azure resources:
+- Resource groups
+- Azure SQL Database
+- Azure Container Registry
+- Azure Kubernetes Service (if applicable)
+This script simplifies the initial infrastructure setup.
+
+### collect_weather_data_task.ps1
+PowerShell script for scheduled data collection using Azure Container Instances. It:
+- Creates a container instance to run the data collection script
+- Monitors the container until completion
+- Cleans up the container after it's done
+This script can be scheduled using Azure Automation.
+
+## Configuration Files
+
+### requirements.txt
+Lists all Python package dependencies required by the application:
+- Flask: Web framework
+- pymssql: SQL Server database connector
+- Gunicorn: WSGI HTTP server
+- Requests: HTTP client for API calls
+- python-dateutil: Date manipulation utilities
+
+## Project Documentation
+
+### description.txt
+This file, which provides a comprehensive overview of all files in the project and their purposes.
+
+## Summary
+This project implements a weather data service that collects, stores, and analyzes weather data from around the world. It is containerized using Docker and can be deployed to various Azure services like Azure Container Instances or Azure Kubernetes Service. The application provides a RESTful API for accessing the weather data and statistics.
