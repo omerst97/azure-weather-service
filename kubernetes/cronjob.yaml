@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: weather-data-collector
+spec:
+  schedule: "0 0 * * *"  # Run once a day at midnight
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: weather-data-collector
+            image: weatherdataweacr.azurecr.io/weather-data-service:latest
+            command: ["python", "collect_weather_data.py"]
+            env:
+            - name: DB_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: weather-db-secret
+                  key: db_server
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: weather-db-secret
+                  key: db_name
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: weather-db-secret
+                  key: db_user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: weather-db-secret
+                  key: db_password
+          restartPolicy: OnFailure
